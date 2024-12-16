@@ -1,98 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AR Residential Markers</title>
-    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-    <script src="https://cdn.rawgit.com/jeromeetienne/AR.js/master/aframe/build/aframe-ar.js"></script>
-    <style>
-        body { margin: 0; }
-        #instructions {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            color: white;
-            font-size: 20px;
-        }
-    </style>
-</head>
-<body style="margin: 0; overflow: hidden;">
-    <div id="instructions">Наведите камеру на жилое здание</div>
-    
-    <a-scene embedded arjs='sourceType: webcam;'>
-        <a-entity camera></a-entity>
-    </a-scene>
+<!doctype HTML>
+<html>
 
-    <script>
-        const apiKey = 'AIzaSyD_Wxax3TyBaYzb7NAMdS4iXWkxPFffnO8'; // Замените на ваш ключ API
-        let userLocation = null;
+<script src="https://aframe.io/releases/0.9.2/aframe.min.js"></script>
+<script src="https://raw.githack.com/jeromeetienne/AR.js/2.0.5/aframe/build/aframe-ar.js"></script>
 
-        // Функция для получения геолокации
-        function getLocation() {
-            return new Promise((resolve, reject) => {
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(
-                        (position) => {
-                            userLocation = {
-                                lat: position.coords.latitude,
-                                lng: position.coords.longitude
-                            };
-                            resolve(userLocation);
-                        },
-                        (error) => {
-                            reject(error);
-                        }
-                    );
-                } else {
-                    reject(new Error("Геолокация не поддерживается вашим браузером."));
-                }
-            });
-        }
-
-        async function fetchResidentialBuildings() {
-            if (!userLocation) return [];
-            const response = await fetch(https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${userLocation.lat},${userLocation.lng}&radius=1500&type=establishment&key=${apiKey});
-            const data = await response.json();
-            return data.results.filter(place => place.types.includes('establishment')); // Фильтруем только жилые здания
-        }
-
-        async function updateMarkers() {
-            try {
-                await getLocation(); // Получаем геолокацию
-                const buildings = await fetchResidentialBuildings(); // Получаем жилые здания
-                
-                // Удаляем предыдущие маркеры
-                const existingMarkers = document.querySelectorAll('.building-marker');
-                existingMarkers.forEach(marker => marker.parentNode.removeChild(marker));
-
-                buildings.forEach(building => {
-                    // Создаем новый маркер для каждого найденного жилого здания
-                    const marker = document.createElement('a-entity');
-                    marker.setAttribute('class', 'building-marker');
-                    marker.setAttribute('geometry', 'primitive: sphere; radius: 0.1');
-                    marker.setAttribute('material', 'color: red');
-                    marker.setAttribute('position', ${building.geometry.location.lat} 0.5 ${building.geometry.location.lng});
-                    marker.setAttribute('look-at', '[camera]'); // Указываем, чтобы маркер всегда смотрел на камеру
-                    
-                    document.querySelector('a-scene').appendChild(marker);
-                });
-            } catch (error) {
-                console.error('Ошибка:', error.message);
-            }
-        }
-
-        // Запрашиваем разрешения на геолокацию и камеру
-        async function startApp() {
-            try {
-                await getLocation();
-                setInterval(updateMarkers, 5000); // Обновляем маркеры каждые 5 секунд
-            } catch (error) {
-                console.error('Ошибка:', error.message);
-            }
-        }
-
-        startApp();
-    </script>
+<body style='margin : 0px; overflow: scroll;'>
+  <a-scene embedded arjs>
+    <a-box position='0 0.5 0' material='opacity: 0.5;'></a-box>
+    <a-marker-camera preset='hiro'></a-marker-camera>
+  </a-scene>
 </body>
+
 </html>
